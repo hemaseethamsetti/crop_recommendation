@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: lightblue;
+        }
+        .form-section {
+            margin: 50px auto;
+            text-align: center;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            width: 30%;
+        }
+        input, button {
+            margin: 8px;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+            width: 80%;
+            max-width: 250px;
+        }
+        button {
+            background-color: green;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: darkgreen;
+        }
+        .error {
+            color: red;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-section">
+        <h2>Login</h2>
+        <input type="text" id="username" placeholder="Enter Username">
+        <input type="password" id="password" placeholder="Enter Password">
+        <button onclick="login()">Login</button>
+        <p class="error" id="error-message"></p>
+        <p>Don't have an account? <a href="{{ url_for('register') }}">Register</a></p>
+
+    </div>
+    <script>
+        function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            if (username === 'admin' && password === '1234') {
+                // Successful login, redirect to home page
+                window.location.href = '/crop';
+            } else {
+                // Invalid credentials, show error message
+                document.getElementById('error-message').innerText = 'Invalid credentials. Please register.';
+            }
+        }
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crop Yield Prediction</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #2d572c;
+        }
+
+        nav {
+            margin: 20px 0;
+            text-align: center;
+            background-color: black;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        nav a {
+            margin: 0 15px;
+            text-decoration: none;
+            color: white;
+            font-weight: bold;
+            padding: 8px 16px;
+            transition: background-color 0.3s;
+            border-radius: 5px;
+        }
+
+        nav a:hover {
+            background-color: #555;
+            color: yellow;
+        }
+
+        nav a:active {
+            background-color: #333;
+            color: orange;
+        }
+
+        .form-section {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            margin: auto;
+        }
+
+        input, select, button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+        }
+
+        button {
+            background-color: green;
+            color: white;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: darkgreen;
+        }
+
+        #result {
+            margin-top: 20px;
+            font-weight: bold;
+            color: #2d572c;
+        }
+
+        #error {
+            margin-top: 10px;
+            color: red;
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a href="{{ url_for('crop') }}">Home</a>
+        <a href="{{ url_for('crop_recommendation_page') }}">Crop Recommendation</a>
+        <a href="{{ url_for('crop_yield_page') }}">Crop Yield</a>
+        <a href="{{ url_for('weather') }}">Weather Forecast</a>
+    </nav>
+
+    <h1>Crop Yield Prediction</h1>
+
+    <div class="form-section">
+        <h3>Enter Crop Yield Details</h3>
+        <form id="yield-form">
+            <select id="crop-name" required>
+                <option value="">Select Crop</option>
+                <option value="Wheat">Wheat</option>
+                <option value="Rice">Rice</option>
+                <option value="Maize">Maize</option>
+                <option value="Barley">Barley</option>
+                <option value="Soybean">Soybean</option>
+                <option value="Cotton">Cotton</option>
+                <option value="Sorghum">Sorghum</option>
+                <option value="Millet">Millet</option>
+                <option value="Peanut">Peanut</option>
+                <option value="Sunflower">Sunflower</option>
+                <option value="Sugarcane">Sugarcane</option>
+                <option value="Potato">Potato</option>
+                <option value="Tomato">Tomato</option>
+                <option value="Onion">Onion</option>
+                <option value="Garlic">Garlic</option>
+                <option value="Chili">Chili</option>
+                <option value="Tea">Tea</option>
+                <option value="Coffee">Coffee</option>
+                <option value="Mustard">Mustard</option>
+                <option value="Jute">Jute</option>
+            </select>
+            <select id="soil-type" required>
+                <option value="">Select Soil Type</option>
+                <option value="Loamy">Loamy</option>
+                <option value="Clay">Clay</option>
+                <option value="Sandy">Sandy</option>
+                <option value="Silty">Silty</option>
+                <option value="Peaty">Peaty</option>
+                <option value="Chalky">Chalky</option>
+                <option value="Gravelly">Gravelly</option>
+                <option value="Saline">Saline</option>
+                <option value="Black">Black</option>
+                <option value="Red">Red</option>
+                <option value="Alluvial">Alluvial</option>
+                <option value="Laterite">Laterite</option>
+            </select>
+            <input type="number" id="area" placeholder="Enter Area (in sqft)" required>
+            <button type="submit">Submit</button>
+        </form>
+        <p id="result"></p>
+        <p id="error"></p>
+    </div>
+
+    <script>
+        document.getElementById('yield-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const cropName = document.getElementById('crop-name').value;
+            const soilType = document.getElementById('soil-type').value;
+            const area = document.getElementById('area').value;
+
+            // Clear previous results
+            document.getElementById('result').innerText = '';
+            document.getElementById('error').innerText = '';
+
+            // Send the data to the backend using fetch
+            fetch('/crop-yield', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    crop_name: cropName,
+                    soil_type: soilType,
+                    area: area
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.yield) {
+                    document.getElementById('result').innerText = 'Predicted Yield: ' + data.yield + ' kg';
+                } else if (data.error) {
+                    document.getElementById('error').innerText = 'Error: ' + data.error;
+                } else {
+                    document.getElementById('error').innerText = 'Unexpected error occurred.';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('error').innerText = 'Error fetching yield prediction.';
+            });
+        });
+    </script>
+</body>
+</html>
+

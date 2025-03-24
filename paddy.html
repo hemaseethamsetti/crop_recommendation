@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rice - Crop Information</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: lightyellow;
+        }
+        h1, h2, h3 {
+            text-align: center;
+        }
+        .content {
+            margin: auto;
+            width: 70%;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .crop-image {
+            display: block;
+            margin: 0 auto;
+            width: 30%;
+            border-radius: 10px;
+        }
+        .details {
+            margin-top: 15px;
+            text-align: center;
+        }
+        .toggle-btn {
+            margin: 10px auto;
+            display: block;
+            padding: 10px 20px;
+            background-color: green;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .toggle-btn:hover {
+            background-color: darkgreen;
+        }
+        .back-btn {
+            margin: 20px auto;
+            display: block;
+            padding: 10px 20px;
+            background-color: #555;
+            color: white;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .back-btn:hover {
+            background-color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="content">
+        <h1>🌾 Rice</h1>
+        <img class="crop-image" src="{{ url_for('static', filename='assets/paddy.png.webp') }}" alt="Rice">
+        <h2>Crop Information</h2>
+        <p>Rice is a staple food for over half of the world's population. It is primarily grown in tropical and subtropical regions.</p>
+        
+        <button class="toggle-btn" onclick="toggleDetails()">Show More Details</button>
+        
+        <div class="details" id="crop-details" style="display: none;">
+            <h3>Common Diseases</h3>
+            <ul>
+                <li>Rice Blast</li>
+                <li>Sheath Blight</li>
+                <li>Bacterial Leaf Blight</li>
+            </ul>
+
+            <h3>Suitable Fertilizers</h3>
+            <ul>
+                <li>Nitrogen (Urea)</li>
+                <li>Phosphorus (SSP)</li>
+                <li>Potassium (MOP)</li>
+            </ul>
+        </div>
+
+        <a class="back-btn" href="{{ url_for('crop') }}">Back to Home</a>
+    </div>
+
+    <script>
+        function toggleDetails() {
+            const details = document.getElementById('crop-details');
+            const button = document.querySelector('.toggle-btn');
+            if (details.style.display === 'none') {
+                details.style.display = 'block';
+                button.textContent = 'Show Less Details';
+            } else {
+                details.style.display = 'none';
+                button.textContent = 'Show More Details';
+            }
+        }
+    </script>
+</body>
+</html>

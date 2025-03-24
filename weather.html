@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head<!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Weather Forecast</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                background-color: #f4f4f9;
+                padding: 0;
+                margin: 0;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100vh;
+                flex-direction: column;
+            }
+    
+            nav {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                background-color: black;
+                padding: 10px 0;
+                text-align: center;
+                z-index: 10;
+            }
+    
+            nav a {
+                margin: 0 15px;
+                text-decoration: none;
+                color: white;
+                font-weight: bold;
+                padding: 8px 16px;
+                transition: background-color 0.3s;
+                border-radius: 5px;
+            }
+    
+            nav a:hover {
+                background-color: #555;
+                color: yellow;
+            }
+    
+            nav a:active {
+                background-color: #333;
+                color: orange;
+            }
+    
+            .form-section {
+                background-color: white;
+                padding: 40px;
+                border-radius: 15px;
+                box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+                max-width: 600px;
+                margin: 80px auto;
+                text-align: center;
+                margin-top: 100px;
+            }
+    
+            input, button {
+                width: 100%;
+                padding: 14px;
+                margin: 12px 0;
+                border-radius: 5px;
+                border: 1px solid #ccc;
+                font-size: 18px;
+            }
+    
+            button {
+                background-color: green;
+                color: white;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+            }
+    
+            button:hover {
+                background-color: darkgreen;
+            }
+    
+            .weather-result {
+                text-align: center;
+                margin-top: 20px;
+            }
+    
+            .forecast-container {
+                display: flex;
+                justify-content: center;
+                flex-wrap: wrap;
+                gap: 10px;
+                margin: 20px auto;
+            }
+    
+            .forecast-card {
+                background-color: #fff;
+                padding: 20px;
+                margin: 10px;
+                border-radius: 8px;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                min-width: 200px;
+            }
+    
+            .forecast-card h4 {
+                margin: 0 0 10px 0;
+            }
+        </style>
+    </head>
+    <body>
+        <nav>
+            <a href="{{ url_for('crop') }}">Home</a>
+            <a href="{{ url_for('crop_recommendation_page') }}">Crop Recommendation</a>
+            <a href="{{ url_for('crop_yield_page') }}">Crop Yield</a>
+            <a href="{{ url_for('weather') }}">Weather Forecast</a>
+        </nav>
+    
+        <div class="form-section">
+            <h2>Weather Forecast</h2>
+            <input type="text" id="city" placeholder="Enter City Name" required>
+            <button onclick="getWeatherForecast()">Get Forecast</button>
+        </div>
+    
+        <div class="weather-result" id="weather-result"></div>
+    
+        <script>
+            function getWeatherForecast() {
+                const city = document.getElementById('city').value;
+                const API_KEY = 'ffdc73fba9bede8bb4da20f33d4843df';
+                const API_URL = `http://api.openweathermap.org/data/2.5/forecast?q=${city}&units=metric&appid=${API_KEY}`;
+    
+                if (!city) {
+                    alert('Please enter a city name.');
+                    return;
+                }
+    
+                fetch(API_URL)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.cod === '404') {
+                            alert('City not found!');
+                            return;
+                        }
+                        displayWeather(data);
+                    })
+                    .catch(error => {
+                        console.error('Error fetching weather data:', error);
+                        alert('Error fetching weather data. Please try again.');
+                    });
+            }
+    
+            function displayWeather(data) {
+                const forecastContainer = document.getElementById('weather-result');
+                forecastContainer.innerHTML = '';
+                let forecastHTML = '<h3>5-Day Forecast</h3><div class="forecast-container">';
+                data.list.forEach((forecast, index) => {
+                    if (index % 8 === 0) {
+                        const date = new Date(forecast.dt * 1000);
+                        forecastHTML += `
+                            <div class="forecast-card">
+                                <h4>${date.toLocaleDateString()} - ${date.toLocaleTimeString()}</h4>
+                                <p><strong>Temperature:</strong> ${forecast.main.temp}°C</p>
+                                <p><strong>Weather:</strong> ${forecast.weather[0].description}</p>
+                                <p><strong>Wind Speed:</strong> ${forecast.wind.speed} m/s</p>
+                            </div>
+                        `;
+                    }
+                });
+                forecastHTML += '</div>';
+                forecastContainer.innerHTML = forecastHTML;
+            }
+        </script>
+    </body>
+    </html>
+    

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crop Recommendation and Yield Prediction</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: lightgreen;
+        }
+        h1 {
+            text-align: center;
+            color: #2d572c;
+        }
+        nav {
+            margin: 20px 0;
+            text-align: center;
+            background-color: black;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        nav a {
+            margin: 0 15px;
+            text-decoration: none;
+            color: white;
+            font-weight: bold;
+            padding: 8px 16px;
+            transition: background-color 0.3s;
+            border-radius: 5px;
+        }
+        nav a:hover {
+            background-color: #555;
+            color: yellow;
+        }
+        nav a:active {
+            background-color: #333;
+            color: orange;
+        }
+        .container {
+            margin: auto;
+            width: 80%;
+            padding: 10px;
+            background-color: #fff;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border-radius: 10px;
+        }
+        .crop-card {
+            display: inline-block;
+            width: 200px;
+            margin: 15px;
+            text-align: center;
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+        .crop-card img {
+            width: 100%;
+            height: 150px;
+            border-radius: 8px;
+            transition: transform 0.3s ease;
+        }
+        .crop-card:hover img {
+            transform: scale(1.05);
+        }
+        .learn-more {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            padding: 8px;
+            background-color: rgba(0,0,0,0.6);
+            color: white;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .crop-card:hover .learn-more {
+            opacity:1;
+        }
+    </style>
+</head>
+<body>
+    <h1>🌱 Crop Recommendation and Yield Prediction 🌾</h1>
+    <div class="container">
+        <nav>
+            <nav>
+                <a href="{{ url_for('crop') }}">Home</a>
+                <a href="{{ url_for('crop_recommendation_page') }}">Crop Recommendation</a>
+                <a href="{{ url_for('crop_yield_page') }}">Crop Yield</a>
+                <a href="{{ url_for('weather') }}">Weather Forecast</a>
+            </nav>
+            
+        </nav>
+        <h2><center><b>Welcome to the Crop Recommendation and Yield Prediction Platform!</b></center></h2>
+        <p>This platform helps farmers make informed decisions by recommending the best crops to grow based on soil type, area, and season.</p>
+        <center><h3>Explore Crops</h3></center>
+        <div id="crop-list">
+            <div class="crop-card">
+                <a href="{{ url_for('home_section', filename='wheat.html') }}" style="text-decoration: none; color: inherit;">
+                    <img src="{{ url_for('static', filename='assets/wheat.png.webp') }}" alt="Wheat">
+                    <div class="learn-more">Learn More</div>
+                    <p>Wheat</p>
+                </a>
+            </div>
+            <div class="crop-card">
+                <a href="{{ url_for('home_section', filename='sugarcane.html') }}" style="text-decoration: none; color: inherit;">
+                    <img src="{{ url_for('static', filename='assets/sugarcane.png.webp') }}" alt="Sugarcane">
+                    <div class="learn-more">Learn More</div>
+                    <p>Sugarcane</p>
+                </a>
+            </div>
+            <div class="crop-card">
+                <a href="{{ url_for('home_section', filename='paddy.html') }}" style="text-decoration: none; color: inherit;">
+                    <img src="{{ url_for('static', filename='assets/paddy.png.webp') }}" alt="Paddy">
+                    <div class="learn-more">Learn More</div>
+                    <p>Paddy</p>
+                </a>
+            </div>
+            <div class="crop-card">
+                <a href="{{ url_for('home_section', filename='maize.html') }}" style="text-decoration: none; color: inherit;">
+                    <img src="{{ url_for('static', filename='assets/maize.png.webp') }}" alt="Maize">
+                    <div class="learn-more">Learn More</div>
+                    <p>Maize</p>
+                </a>
+            </div>
+            <div class="crop-card">
+                <a href="{{ url_for('home_section', filename='cotton.html') }}" style="text-decoration: none; color: inherit;">
+                    <img src="{{ url_for('static', filename='assets/cotton.png.webp') }}" alt="Cotton">
+                    <div class="learn-more">Learn More</div>
+                    <p>Cotton</p>
+                </a>
+            </div>
+        </div>
+        
+</body>
+</html>

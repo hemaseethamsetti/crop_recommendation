@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: lightgreen;
+        }
+        .form-section {
+            margin: 50px auto;
+            text-align: center;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            width: 30%;
+        }
+        input, select, button {
+            margin: 8px;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+            width: 80%;
+            max-width: 250px;
+        }
+        button {
+            background-color: green;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: darkgreen;
+        }
+        .success {
+            color: green;
+            margin-top: 10px;
+            font-size: 18px;
+            display: none;
+        }
+        .error {
+            color: red;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-section">
+        <h2>Register</h2>
+        <input type="text" id="name" placeholder="Enter Name">
+        <input type="text" id="phone" placeholder="Enter Phone Number (10 digits)">
+        
+        <!-- Dropdown for State Selection -->
+        <select id="state">
+            <option value="">Select State</option>
+            <option value="Andhra Pradesh">Andhra Pradesh</option>
+            <option value="Arunachal Pradesh">Arunachal Pradesh</option>
+            <option value="Assam">Assam</option>
+            <option value="Bihar">Bihar</option>
+            <option value="Chhattisgarh">Chhattisgarh</option>
+            <option value="Goa">Goa</option>
+            <option value="Gujarat">Gujarat</option>
+            <option value="Haryana">Haryana</option>
+            <option value="Himachal Pradesh">Himachal Pradesh</option>
+            <option value="Jharkhand">Jharkhand</option>
+            <option value="Karnataka">Karnataka</option>
+            <option value="Kerala">Kerala</option>
+            <option value="Madhya Pradesh">Madhya Pradesh</option>
+            <option value="Maharashtra">Maharashtra</option>
+            <option value="Manipur">Manipur</option>
+            <option value="Meghalaya">Meghalaya</option>
+            <option value="Mizoram">Mizoram</option>
+            <option value="Nagaland">Nagaland</option>
+            <option value="Odisha">Odisha</option>
+            <option value="Punjab">Punjab</option>
+            <option value="Rajasthan">Rajasthan</option>
+            <option value="Sikkim">Sikkim</option>
+            <option value="Tamil Nadu">Tamil Nadu</option>
+            <option value="Telangana">Telangana</option>
+            <option value="Tripura">Tripura</option>
+            <option value="Uttar Pradesh">Uttar Pradesh</option>
+            <option value="Uttarakhand">Uttarakhand</option>
+            <option value="West Bengal">West Bengal</option>
+        </select>
+        
+        <input type="text" id="new-username" placeholder="Create Username">
+        <input type="password" id="new-password" placeholder="Create Password">
+        <button onclick="register()">Register</button>
+        <p class="success" id="success-message">Registration successful! You can now login.</p>
+        <p class="error" id="register-error"></p>
+        <p><a href="{{ url_for('login') }}">Back to Login</a></p>
+    </div>
+    <script>
+        function register() {
+            const name = document.getElementById('name').value;
+            const phone = document.getElementById('phone').value;
+            const state = document.getElementById('state').value;
+            const newUsername = document.getElementById('new-username').value;
+            const newPassword = document.getElementById('new-password').value;
+
+            // Clear any previous error or success messages
+            document.getElementById('register-error').innerText = '';
+            document.getElementById('success-message').style.display = 'none';
+
+            // Validate that all fields are filled
+            if (!name || !phone || !state || !newUsername || !newPassword) {
+                document.getElementById('register-error').innerText = 'All fields must be filled out.';
+                return;
+            }
+
+            // Validate that the name only contains alphabets and spaces
+            if (/[^a-zA-Z ]/.test(name)) {
+                document.getElementById('register-error').innerText = 'Name should contain only alphabets and spaces.';
+                return;
+            }
+
+            // Validate phone number (should be 10 digits and only contain numbers)
+            if (!/^\d{10}$/.test(phone)) {
+                document.getElementById('register-error').innerText = 'Phone number should contain exactly 10 digits.';
+                return;
+            }
+
+            // Validate state name (should only contain alphabets and spaces)
+            if (/[^a-zA-Z ]/.test(state)) {
+                document.getElementById('register-error').innerText = 'State name should contain only alphabets and spaces.';
+                return;
+            }
+
+            // Validate username (should be alphanumeric)
+            if (!/^[a-zA-Z0-9]+$/.test(newUsername)) {
+                document.getElementById('register-error').innerText = 'Username should contain only alphanumeric characters.';
+                return;
+            }
+
+            // Validate password (should be at least 6 characters)
+            if (newPassword.length < 6) {
+                document.getElementById('register-error').innerText = 'Password should be at least 6 characters long.';
+                return;
+            }
+
+            // If all fields are filled and valid, show success message and redirect to login page
+            document.getElementById('success-message').style.display = 'block';
+
+            // Simulate registration process, then navigate to login page
+            setTimeout(function() {
+                window.location.href = 'login.html';
+            }, 2000);  // Redirect after 2 seconds
+        }
+
+        // Handle "Back to Login" link
+        document.querySelector('a[href="login.html"]').addEventListener('click', function(event) {
+            // Prevent default behavior and go back
+            event.preventDefault();
+            window.history.back();
+        });
+    </script>
+</body>
+</html>
