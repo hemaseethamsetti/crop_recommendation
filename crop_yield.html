@@ -98,45 +98,54 @@
     <div class="form-section">
         <h3>Enter Crop Yield Details</h3>
         <form id="yield-form">
-            <select id="crop-name" required>
-                <option value="">Select Crop</option>
-                <option value="Wheat">Wheat</option>
-                <option value="Rice">Rice</option>
-                <option value="Maize">Maize</option>
-                <option value="Barley">Barley</option>
-                <option value="Soybean">Soybean</option>
-                <option value="Cotton">Cotton</option>
-                <option value="Sorghum">Sorghum</option>
-                <option value="Millet">Millet</option>
-                <option value="Peanut">Peanut</option>
-                <option value="Sunflower">Sunflower</option>
-                <option value="Sugarcane">Sugarcane</option>
-                <option value="Potato">Potato</option>
-                <option value="Tomato">Tomato</option>
-                <option value="Onion">Onion</option>
-                <option value="Garlic">Garlic</option>
-                <option value="Chili">Chili</option>
-                <option value="Tea">Tea</option>
-                <option value="Coffee">Coffee</option>
-                <option value="Mustard">Mustard</option>
-                <option value="Jute">Jute</option>
+            <label for="state">State:</label>
+            <select id="state" required>
+                <option value="">Select State</option>
+                <option value="Andaman and Nicobar Islands">Andaman and Nicobar Islands</option>
+                <option value="Andhra Pradesh">Andhra Pradesh</option>
+                <option value="Assam">Assam</option>
+                <option value="Goa">Goa</option>
+                <option value="Karnataka">Karnataka</option>
+                <option value="Kerala">Kerala</option>
+                <option value="Meghalaya">Meghalaya</option>
+                <option value="Puducherry">Puducherry</option>
+                <option value="Tamil Nadu">Tamil Nadu</option>
+                <option value="West Bengal">West Bengal</option>
+                <option value="Bihar">Bihar</option>
+                <option value="Chhattisgarh">Chhattisgarh</option>
+                <option value="Dadra and Nagar Haveli">Dadra and Nagar Haveli</option>
+                <option value="Gujarat">Gujarat</option>
+                <option value="Haryana">Haryana</option>
+                <option value="Madhya Pradesh">Madhya Pradesh</option>
+                <option value="Maharashtra">Maharashtra</option>
+                <option value="Manipur">Manipur</option>
+                <option value="Rajasthan">Rajasthan</option>
+                <option value="Telangana">Telangana</option>
+                <option value="Uttar Pradesh">Uttar Pradesh</option>
+                <option value="Arunachal Pradesh">Arunachal Pradesh</option>
+                <option value="Himachal Pradesh">Himachal Pradesh</option>
+                <option value="Jammu and Kashmir">Jammu and Kashmir</option>
+                <option value="Nagaland">Nagaland</option>
+                <option value="Odisha">Odisha</option>
+                <option value="Uttarakhand">Uttarakhand</option>
+                <option value="Mizoram">Mizoram</option>
+                <option value="Punjab">Punjab</option>
+                <option value="Tripura">Tripura</option>
             </select>
+
+            <label for="soil-type">Soil Type:</label>
             <select id="soil-type" required>
                 <option value="">Select Soil Type</option>
-                <option value="Loamy">Loamy</option>
-                <option value="Clay">Clay</option>
-                <option value="Sandy">Sandy</option>
-                <option value="Silty">Silty</option>
-                <option value="Peaty">Peaty</option>
-                <option value="Chalky">Chalky</option>
-                <option value="Gravelly">Gravelly</option>
-                <option value="Saline">Saline</option>
-                <option value="Black">Black</option>
-                <option value="Red">Red</option>
-                <option value="Alluvial">Alluvial</option>
-                <option value="Laterite">Laterite</option>
             </select>
-            <input type="number" id="area" placeholder="Enter Area (in sqft)" required>
+
+            <label for="crop-name">Crop Name:</label>
+            <select id="crop-name" required>
+                <option value="">Select Crop</option>
+            </select>
+
+            <label for="area">Area (in sqft):</label>
+            <input type="number" id="area" placeholder="Enter Area" required>
+
             <button type="submit">Submit</button>
         </form>
         <p id="result"></p>
@@ -144,45 +153,68 @@
     </div>
 
     <script>
-        document.getElementById('yield-form').addEventListener('submit', function(event) {
-            event.preventDefault();
+        document.getElementById('state').addEventListener('change', function() {
+            const state = this.value;
+            fetch(`/get_yield_options?state=${state}`)
+                .then(response => response.json())
+                .then(data => {
+                    const soilTypeSelect = document.getElementById('soil-type');
+                    const cropNameSelect = document.getElementById('crop-name');
 
-            const cropName = document.getElementById('crop-name').value;
-            const soilType = document.getElementById('soil-type').value;
-            const area = document.getElementById('area').value;
+                    soilTypeSelect.innerHTML = '<option value="">Select Soil Type</option>';
+                    cropNameSelect.innerHTML = '<option value="">Select Crop</option>';
 
-            // Clear previous results
-            document.getElementById('result').innerText = '';
-            document.getElementById('error').innerText = '';
+                    data.soil_types.forEach(soil => {
+                        soilTypeSelect.innerHTML += `<option value="${soil}">${soil}</option>`;
+                    });
 
-            // Send the data to the backend using fetch
-            fetch('/crop-yield', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    crop_name: cropName,
-                    soil_type: soilType,
-                    area: area
+                    data.crops.forEach(crop => {
+                        cropNameSelect.innerHTML += `<option value="${crop}">${crop}</option>`;
+                    });
                 })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.yield) {
-                    document.getElementById('result').innerText = 'Predicted Yield: ' + data.yield + ' kg';
-                } else if (data.error) {
-                    document.getElementById('error').innerText = 'Error: ' + data.error;
-                } else {
-                    document.getElementById('error').innerText = 'Unexpected error occurred.';
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                document.getElementById('error').innerText = 'Error fetching yield prediction.';
-            });
+                .catch(error => console.error('Error fetching options:', error));
+        });
+
+        document.getElementById("yield-form").addEventListener("submit", function(event) {
+            event.preventDefault();  // Prevent form from reloading the page
+
+            let state = document.getElementById("state").value;
+            let soil_type = document.getElementById("soil-type").value;
+            let crop_name = document.getElementById("crop-name").value; // Ensure this matches 'crop'
+            let area = document.getElementById("area").value;
+
+            // Validate that all fields are selected
+            if (state && soil_type && crop_name && area) {
+                fetch("/predict_yield", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        state, 
+                        soil_type, 
+                        crop: crop_name,   // Ensure 'crop' field matches the back-end
+                        area
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.predicted_yield) {
+                        document.getElementById("result").innerHTML = 
+                            `<b>Predicted Yield:</b> ${data.predicted_yield} tons`;
+                        document.getElementById("error").innerHTML = "";
+                    } else {
+                        document.getElementById("result").innerHTML = "";
+                        document.getElementById("error").innerHTML = `<b>Error:</b> ${data.error}`;
+                    }
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                    document.getElementById("result").innerHTML = "";
+                    document.getElementById("error").innerHTML = "<b>Something went wrong.</b>";
+                });
+            } else {
+                document.getElementById("error").innerHTML = "<b>Error:</b> All fields must be filled!";
+            }
         });
     </script>
 </body>
 </html>
-
