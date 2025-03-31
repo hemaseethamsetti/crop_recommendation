@@ -1,18 +1,29 @@
 import os
 import pickle
-import random
+import pandas as pd
 from flask import Flask, render_template, request, jsonify, redirect, url_for
 
 app = Flask(__name__, template_folder="templates")
+print("Current Working Directory:", os.getcwd())
 
-# Set working directory to the backend folder
-os.chdir(os.path.dirname(os.path.abspath(__file__)))
+# Load models
+crop_model = pickle.load(open(r"C:\Users\hemas\Desktop\crop_re\backend\crop_recommendation (2).pkl", "rb"))
+yield_model = pickle.load(open(r"C:\Users\hemas\Desktop\crop_re\backend\yield_prediction (1).pkl", "rb"))
 
-# Load the crop recommendation model
-crop_model = pickle.load(open(r"C:\Users\hemas\Desktop\crop_re\backend\crop_recommendation.pkl", "rb"))
+# Load dataset
+try:
+    dataset = pd.read_csv(r"C:\Users\hemas\Desktop\crop_re\backend\upload.csv")
+    print("Dataset loaded successfully:", dataset.head())  # Debugging line
+except Exception as e:
+    print(f"Error loading dataset: {str(e)}")
+    dataset = None  # Explicitly set to None for debugging
 
-# Load the crop yield prediction model
-yield_model = pickle.load(open(r"C:\Users\hemas\Desktop\crop_re\backend\yield_prediction.pkl", "rb"))
+if 'dataset' not in globals() or dataset is None:
+    raise ValueError("Dataset is not loaded correctly.")
+
+
+print("Dataset Columns:", dataset.columns)
+print("Dataset Sample:", dataset.head())
 
 @app.route('/')
 def login():
@@ -22,7 +33,6 @@ def login():
 def login_post():
     username = request.form['username']
     password = request.form['password']
-    # Simple authentication
     if username == 'admin' and password == '1234':
         return redirect(url_for('crop'))
     return render_template("login.html", error="Invalid credentials")
@@ -30,7 +40,6 @@ def login_post():
 @app.route('/register')
 def register():
     return render_template("reg.html")
-
 
 @app.route('/crop')
 def crop():
@@ -44,94 +53,131 @@ def home_section(filename):
 def crop_recommendation_page():
     return render_template("crop_recom.html")
 
+# Load encoders
+state_encoder = pickle.load(open(r"C:\Users\hemas\Desktop\crop_re\backend\state_encoder.pkl", "rb"))
+soil_type_encoder = pickle.load(open(r"C:\Users\hemas\Desktop\crop_re\backend\soil_type_encoder.pkl", "rb"))
+season_encoder = pickle.load(open(r"C:\Users\hemas\Desktop\crop_re\backend\season_encoder.pkl", "rb"))
+
+@app.route('/predict_crop', methods=['POST'])
+def predict_crop():
+    try:
+        data = request.get_json()
+        state = data['state']
+        soil_type = data['soil_type']
+        season = data['season']
+
+        # Clean input values
+        state_cleaned = state.strip().lower()
+        soil_type_cleaned = soil_type.strip()
+        season_cleaned = season.strip()
+
+        required_columns = {'State_Name', 'soil_type', 'Season', 'Crop'}
+        if not required_columns.issubset(dataset.columns):
+            return jsonify({'error': 'Dataset is missing required columns'}), 500
+
+        dataset['State_Name'] = dataset['State_Name'].astype(str).str.lower()
+        dataset['soil_type'] = dataset['soil_type'].astype(str).str.strip()
+        dataset['Season'] = dataset['Season'].astype(str).str.strip()
+
+        filtered_data = dataset[
+            (dataset['State_Name'] == state_cleaned) &
+            (dataset['soil_type'] == soil_type_cleaned) &
+            (dataset['Season'] == season_cleaned)
+        ]
+
+        if filtered_data.empty:
+            return jsonify({'error': 'No matching data found for the given inputs'}), 400
+
+        recommended_crop = filtered_data['Crop'].iloc[0]
+        return jsonify({'recommended_crop': recommended_crop})
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/crop_yield')
 def crop_yield_page():
     return render_template("crop_yield.html")
+
+import random
+
+@app.route('/predict_yield', methods=['POST'])
+def predict_yield():
+    try:
+        data = request.get_json()
+        print("Received Data:", data)  # Debugging line
+
+        state = data['state']
+        soil_type = data['soil_type']
+        area = float(data['area'])
+        crop = data['crop']
+
+        # Random yield generation based on crop type (in tons)
+        crop_yield_ranges = {
+            'Arecanut': (2, 4),
+            'Banana': (15, 25),
+            'Dry chillies': (0.5, 1.5),
+            'Coconut': (3, 5),
+            'Cotton(lint)': (1.5, 3),
+            'Dry ginger': (1, 2),
+            'Groundnut': (1, 2.5)
+        }
+
+        if crop not in crop_yield_ranges:
+            return jsonify({'error': 'Crop not recognized for yield prediction.'}), 400
+
+        min_yield, max_yield = crop_yield_ranges[crop]
+        predicted_yield = random.uniform(min_yield, max_yield) * (area / 10000)  # Adjusting for area in hectares
+
+        return jsonify({'predicted_yield': round(predicted_yield, 2)})
+
+    except Exception as e:
+        print("Error:", str(e))  # Debugging line
+        return jsonify({'error': str(e)}), 500
+
+   
 
 @app.route('/weather')
 def weather():
     return render_template("weather.html")
 
+#  Crop Recommendation Options (Soil Types & Seasons)
+@app.route('/get_recommendation_options', methods=['GET'])
+def get_recommendation_options():
+    state = request.args.get('state', '').strip().lower()
 
-random_crops = [
-    "Wheat", "Rice", "Maize", "Barley", "Soybean", "Cotton", "Sorghum", 
-    "Millet", "Peanut", "Sunflower", "Sugarcane", "Potato", "Tomato", 
-    "Onion", "Garlic", "Chili", "Tea", "Coffee", "Mustard", "Jute"
-]
+    if not state:
+        return jsonify({'error': 'State parameter is missing'}), 400
 
-soil_type_mapping = {"Loamy": 0, "Clay": 1, "Sandy": 2, "Silty": 3, "Peaty": 4, "Chalky": 5, "Gravelly": 6, "Saline": 7, "Black": 8, "Red": 9, "Alluvial": 10, "Laterite": 11}
+    state_data = dataset[dataset['State_Name'].str.lower() == state]
 
-season_mapping = {"Summer": 0, "Winter": 1, "Rainy": 2, "Autumn": 3, "Spring": 4, "Monsoon": 5}
+    if state_data.empty:
+        return jsonify({'soil_types': [], 'seasons': [], 'message': 'No data found for the selected state'})
 
-state_mapping = {"Andhra Pradesh": 0, "Telangana": 1, "Karnataka": 2, "Tamil Nadu": 3, "Kerala": 4, "Maharashtra": 5, "Punjab": 6, "Gujarat": 7, "Rajasthan": 8, "Uttar Pradesh": 9, "Bihar": 10, "West Bengal": 11, "Madhya Pradesh": 12, "Odisha": 13, "Haryana": 14, "Chhattisgarh": 15, "Jharkhand": 16, "Assam": 17, "Himachal Pradesh": 18, "Jammu and Kashmir": 19}
+    soil_types = state_data['soil_type'].dropna().unique().tolist()
+    seasons = state_data['Season'].dropna().unique().tolist()
 
-@app.route('/crop_recommendation', methods=['POST'])
-def crop_recommendation():
-    try:
-        data = request.get_json()
-        soil_type = data['soil_type']
-        area = float(data.get('area', 0))
-        season = data['season']
-        state = data['state']
-        soil_type_code = soil_type_mapping.get(soil_type, -1)
-        season_code = season_mapping.get(season, -1)
-        state_code = state_mapping.get(state, -1)
-        if soil_type_code == -1 or season_code == -1 or state_code == -1:
-            return jsonify({'error': 'Invalid soil type, season, or state'}), 400
-        try:
-            prediction = crop_model.predict([[soil_type_code, area, season_code, state_code]])[0]
-        except Exception as e:
-            print(f"Prediction failed: {e}")
-            prediction = random.choice(random_crops)
-            print(f"Random crop generated: {prediction}")
+    return jsonify({
+        'soil_types': soil_types,
+        'seasons': seasons
+    })
 
-        return jsonify({'recommended_crop': prediction})
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+#  Crop Yield Options (Soil Types & Crops)
+@app.route('/get_yield_options', methods=['GET'])
+def get_yield_options():
+    state = request.args.get('state', '').strip().lower()
 
-@app.route('/crop-yield', methods=['POST'])
-def crop_yield():
-    data = request.get_json()
-    crop_name = data.get('crop_name')
-    area = float(data.get('area'))
+    if not state:
+        return jsonify({'error': 'State parameter is missing'}), 400
 
-    # Yield ranges for different crops (kg per acre)
-    yield_ranges = {
-        "Wheat": (1500, 3000),
-        "Rice": (2000, 4000),
-        "Maize": (1000, 3000),
-        "Barley": (1000, 2500),
-        "Soybean": (800, 2000),
-        "Cotton": (300, 800),
-        "Sorghum": (800, 1800),
-        "Millet": (500, 1500),
-        "Peanut": (800, 2500),
-        "Sunflower": (600, 1200),
-        "Sugarcane": (30000, 50000),
-        "Potato": (8000, 15000),
-        "Tomato": (10000, 20000),
-        "Onion": (8000, 15000),
-        "Garlic": (3000, 6000),
-        "Chili": (800, 1500),
-        "Tea": (500, 1000),
-        "Coffee": (400, 800),
-        "Mustard": (600, 1200),
-        "Jute": (1000, 2500)
-    }
+    state_data = dataset[dataset['State_Name'].str.lower() == state]
 
-    # Get the average yield per acre for the selected crop
-    if crop_name in yield_ranges:
-        min_yield, max_yield = yield_ranges[crop_name]
-        average_yield_per_acre = (min_yield + max_yield) / 2
-    else:
-        return jsonify({"error": "Crop not found"}), 400
+    if state_data.empty:
+        return jsonify({'soil_types': [], 'crops': [], 'message': 'No data found for the selected state'})
 
-    # Convert area from sqft to acres
-    area_acres = area / 43560
+    soil_types = state_data['soil_type'].dropna().unique().tolist()
+    crops = state_data['Crop'].dropna().unique().tolist()
 
-    # Calculate the total yield (directly proportional to area)
-    yield_prediction = average_yield_per_acre * area_acres
+    return jsonify({'soil_types': soil_types, 'crops': crops})
 
-    return jsonify({"yield": round(yield_prediction, 2)})
 if __name__ == "__main__":
     app.run(debug=True)
